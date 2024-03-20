@@ -1,0 +1,279 @@
+---
+title: "The Road to Chicken Dinner: An analysis of PUBG gameplay statistics"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r}
+set.seed(0)
+setwd("<Current Working directory of the project>")
+```
+
+```{r}
+data <- read.csv("Datasets/training/filtered_training.csv", header = TRUE)
+test_data <- read.csv("Datasets/testing/filtered_linear_regression_testing.csv", header = TRUE)
+```
+
+
+\textbf{Multiple Linear Regression with all the predictor variables}
+```{r}
+model = lm(winPlacePerc ~ ., data= data)
+summary(model)
+```
+
+\textbf{Multiple Linear Regression: w/o KillPoints attributes}
+```{r}
+model = lm(winPlacePerc ~ . - killPoints, data= data)
+summary(model)
+```
+
+\textbf{Backward Elimination}
+```{r}
+model_bwd = lm(winPlacePerc ~ . - killPoints - vehicleDestroys - roadKills - headshotKills , data= data)
+summary(model_bwd)
+```
+
+```{r}
+preds = predict(model_bwd, newdata = test_data)
+plot(preds~test_data$winPlacePerc , xlab = "Expected winPlacePerc" , ylab ="Predicted winPlacePerc")
+print(paste('Mean Square Error:', sum((preds - test_data$winPlacePerc)^2) / length(preds)))
+abline(0, 1, col="red", lwd = 2)
+```
+
+```{r}
+par(mfrow=c(2, 2))
+plot(model_bwd)
+```
+
+
+```{r}
+print(paste('Mean Square Error:', sum((preds - test_data$winPlacePerc)^2) / length(preds)))
+```
+
+```{r}
+summary(model_bwd)$coefficients[,c(0,1)]
+```
+
+```{r}
+p_vals = summary(model_bwd)$coefficients[,4]
+tab = cbind(summary(model_bwd)$coefficients[,0], unname(p_vals),p.adjust(unname(p_vals),method = p.adjust.methods, n=length(unname(p_vals))))
+colnames(tab) = c("Unadjusted", "Adjusted")
+tab
+```
+
+\textbf{Forward Elimination}
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance , data=data)
+broom::glance(model_fwd)
+#summary(model_fwd)
+```
+
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts , data=data)
+broom::glance(model_fwd)
+```
+
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists + DBNOs , data=data)
+broom::glance(model_fwd)
+```
+
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists + DBNOs + revives , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists + DBNOs + revives + swimDistance , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists + DBNOs + revives + swimDistance + numGroups , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists + DBNOs + revives + swimDistance + numGroups + maxPlace , data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists + DBNOs + revives + swimDistance + numGroups + maxPlace + matchDuration, data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists + DBNOs + revives + swimDistance + numGroups + maxPlace + matchDuration + kill_category, data=data)
+broom::glance(model_fwd)
+```
+
+```{r}
+model_fwd = lm(winPlacePerc ~ walkDistance + killPlace + boosts + weaponsAcquired + kills + killStreaks + rideDistance + assists + DBNOs + revives + swimDistance + numGroups + maxPlace + matchDuration + kill_category + matchType, data=data)
+broom::glance(model_fwd)
+```
+
+
+\textbf{Building models with respect to commute type}
+```{r}
+model_walk =lm(winPlacePerc ~ walkDistance, data = data)
+summary(model_walk)
+```
+
+```{r}
+model_walk =lm(winPlacePerc ~ swimDistance, data = data)
+summary(model_walk)
+```
+
+```{r}
+model_walk =lm(winPlacePerc ~ rideDistance, data = data)
+summary(model_walk)
+```
+
+```{r}
+data_swim = data[data$swimDistance>0,]
+```
+
+
+
+\textbf{Trying to figure out the effect of major attributes to the team play by the pair plot graph}
+
+```{r}
+data <- read.csv("Datasets/training/filtered_training_10_matches.csv", header = TRUE)
+data$matchType = NULL
+temp <- data[, c("assists", "kills", "heals", "revives", "teamKills", "walkDistance", "winPlacePerc")]
+pairs(temp)
+```
+
+\textbf{Trying to find kills vs winPlacePerc:}
+
+```{r}
+data <- read.csv("Datasets/training/filtered_training.csv", header = TRUE)
+data$kills = factor(data$kills)
+data$matchType = factor(data$matchType)
+```
+
+```{r}
+L = aov(winPlacePerc ~ kills, data = data)
+summary(L)
+TukeyHSD(L)
+```
+
+\textbf{Trying to figure out the impact of team play attribute}
+
+```{r}
+data <- read.csv("Datasets/training/filtered_training.csv", header = TRUE)
+team_data = data[data$matchType=="duo" | data$matchType=="duo-fpp" | data$matchType=="squad" | data$matchType=="squad-fpp",]
+```
+
+```{r}
+model_tp = lm(winPlacePerc ~ assists + revives + teamKills + boosts + heals + killPoints + kills + rankPoints, data= team_data)
+summary(model_tp)
+```
+
+
+\textbf{Trying to predict matchType with Logistic Regression}
+
+```{r}
+data <- read.csv("Datasets/training/filtered_training.csv", header = TRUE)
+test_data <- read.csv("Datasets/testing/filtered_logistic_regression_testing.csv", header = TRUE)
+data$matchType = factor(data$matchType)
+
+
+expected_val = factor(test_data$matchType)
+test_data$Id = NULL
+test_data$groupId = NULL
+test_data$matchId = NULL
+```
+
+```{r}
+library(nnet)
+data$matchType <- relevel(data$matchType, ref=1)
+model = multinom(matchType~., data=data, maxit=1000)
+summary(model)
+```
+
+\textbf{Predict the results using the trained Logistic Regression model on the test set}
+
+```{r}
+library(caret)
+preds <- predict(model, newdata = test_data)
+confusionMatrix(data=preds, reference = expected_val)
+```
+
+\textbf {Checking the goodness of fit for the Logistic Regression model}
+```{r}
+library(generalhoslem)
+hl <- logitgof(data$matchType, fitted(model), g = 10, ord = FALSE)
+hl$observed
+hl$observed
+```
+
+
+\textbf{Training the Logistic Regression model only on the three matchType categories by merging the game types based on the camera view}
+```{r}
+data <- read.csv("Datasets/training/filtered_training_only_3.csv", header = TRUE)
+test_data <- read.csv("Datasets/testing/filtered_logistic_regression_testing_only_3.csv", header = TRUE)
+data$matchType = factor(data$matchType)
+
+
+expected_val = factor(test_data$matchType)
+test_data$Id = NULL
+test_data$groupId = NULL
+test_data$matchId = NULL
+```
+
+
+```{r}
+library(nnet)
+data$matchType <- relevel(data$matchType, ref=1)
+model = multinom(matchType~., data=data, maxit=1000)
+summary(model)
+```
+
+```{r}
+library(caret)
+preds <- predict(model, newdata = test_data)
+confusionMatrix(data=preds, reference = expected_val)
+```
+
+```{r}
+library(generalhoslem)
+logitgof(data$matchType, fitted(model), g = 10, ord = FALSE)
+```
